@@ -143,6 +143,10 @@ body, #root {
 
 .animate-in { animation: fadeInUp 0.4s ease-out forwards; }
 .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+
+input[type="date"] { accent-color: ${ACCENT}; }
+input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; filter: invert(40%) sepia(90%) saturate(1500%) hue-rotate(360deg); }
+input[type="checkbox"] { accent-color: ${ACCENT}; }
 `;
 
 // ═══════════════════════════════════════════════════════════════
@@ -233,25 +237,51 @@ const MultiSelect = ({ label, options, selected, onChange }) => {
 // ═══════════════════════════════════════════════════════════════
 const DateRangePicker = ({ startDate, endDate, onStartChange, onEndChange, onClear }) => (
   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-    <input type="date" value={startDate} onChange={(e) => onStartChange(e.target.value)}
-      style={{
-        padding: "8px 12px", border: `1px solid ${BORDER}`, borderRadius: 8,
-        fontSize: 13, fontFamily: "'DM Sans'", background: CARD_BG, color: TEXT,
-        outline: "none",
-      }} />
-    <span style={{ color: TEXT_SEC, fontSize: 13 }}>até</span>
-    <input type="date" value={endDate} onChange={(e) => onEndChange(e.target.value)}
-      style={{
-        padding: "8px 12px", border: `1px solid ${BORDER}`, borderRadius: 8,
-        fontSize: 13, fontFamily: "'DM Sans'", background: CARD_BG, color: TEXT,
-        outline: "none",
-      }} />
+    <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+      <span style={{
+        position: "absolute", left: 12, fontSize: 10, fontWeight: 600, color: ACCENT,
+        textTransform: "uppercase", letterSpacing: 0.5, pointerEvents: "none",
+        top: startDate ? 4 : "50%", transform: startDate ? "none" : "translateY(-50%)",
+        transition: "all 0.2s",
+      }}>{startDate ? "De" : "Data início"}</span>
+      <input type="date" value={startDate} onChange={(e) => onStartChange(e.target.value)}
+        style={{
+          padding: startDate ? "18px 12px 6px" : "10px 12px", border: `1px solid ${ACCENT}40`,
+          borderRadius: 8, fontSize: 13, fontFamily: "'DM Sans'", background: CARD_BG, color: TEXT,
+          outline: "none", transition: "border-color 0.2s", minWidth: 150,
+        }}
+        onFocus={(e) => e.target.style.borderColor = ACCENT}
+        onBlur={(e) => e.target.style.borderColor = `${ACCENT}40`}
+      />
+    </div>
+    <span style={{ color: ACCENT, fontSize: 13, fontWeight: 600 }}>até</span>
+    <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+      <span style={{
+        position: "absolute", left: 12, fontSize: 10, fontWeight: 600, color: ACCENT,
+        textTransform: "uppercase", letterSpacing: 0.5, pointerEvents: "none",
+        top: endDate ? 4 : "50%", transform: endDate ? "none" : "translateY(-50%)",
+        transition: "all 0.2s",
+      }}>{endDate ? "Até" : "Data fim"}</span>
+      <input type="date" value={endDate} onChange={(e) => onEndChange(e.target.value)}
+        style={{
+          padding: endDate ? "18px 12px 6px" : "10px 12px", border: `1px solid ${ACCENT}40`,
+          borderRadius: 8, fontSize: 13, fontFamily: "'DM Sans'", background: CARD_BG, color: TEXT,
+          outline: "none", transition: "border-color 0.2s", minWidth: 150,
+        }}
+        onFocus={(e) => e.target.style.borderColor = ACCENT}
+        onBlur={(e) => e.target.style.borderColor = `${ACCENT}40`}
+      />
+    </div>
     {(startDate || endDate) && (
       <button onClick={onClear} style={{
-        padding: "8px 12px", border: `1px solid ${ACCENT}`, borderRadius: 8,
-        background: "transparent", color: ACCENT, cursor: "pointer",
-        fontSize: 12, fontWeight: 600, fontFamily: "'DM Sans'",
-      }}>Limpar</button>
+        padding: "10px 16px", border: "none", borderRadius: 8,
+        background: ACCENT, color: "#FFF", cursor: "pointer",
+        fontSize: 12, fontWeight: 700, fontFamily: "'DM Sans'",
+        transition: "opacity 0.2s",
+      }}
+        onMouseEnter={(e) => e.target.style.opacity = 0.85}
+        onMouseLeave={(e) => e.target.style.opacity = 1}
+      >Limpar</button>
     )}
   </div>
 );
@@ -403,29 +433,29 @@ const ChartCard = ({ title, subtitle, children, delay = 0 }) => (
 );
 
 // ═══════════════════════════════════════════════════════════════
-// CUSTOM DATA LABELS (anti-overlap)
+// CUSTOM DATA LABELS (anti-overlap — labels on TOP of each bar)
 // ═══════════════════════════════════════════════════════════════
-const BarTopLabel = ({ x, y, width, value }) => {
-  if (!value || value === 0) return null;
+const OnTimeTopLabel = ({ x, y, width, value }) => {
+  if (value === undefined || value === null) return null;
   return (
-    <text x={x + width / 2} y={y - 6} textAnchor="middle" fontSize={10}
-      fontWeight={600} fill={TEXT} fontFamily="'DM Sans'">{value}</text>
+    <text x={x + width / 2} y={y - 6} textAnchor="middle" fontSize={11}
+      fontWeight={700} fill={GREEN} fontFamily="'DM Sans'">{value}</text>
   );
 };
 
-const BarCenterLabel = ({ x, y, width, height, value }) => {
-  if (!value || value === 0 || height < 18) return null;
+const AtrasadasTopLabel = ({ x, y, width, value }) => {
+  if (value === undefined || value === null) return null;
   return (
-    <text x={x + width / 2} y={y + height / 2 + 4} textAnchor="middle" fontSize={9}
-      fontWeight={600} fill="#FFF" fontFamily="'DM Sans'">{value}</text>
+    <text x={x + width / 2} y={y - 6} textAnchor="middle" fontSize={11}
+      fontWeight={700} fill={RED} fontFamily="'DM Sans'">{value}</text>
   );
 };
 
 const LineLabel = ({ x, y, value }) => {
   if (value === undefined || value === null) return null;
   return (
-    <text x={x} y={y - 14} textAnchor="middle" fontSize={10}
-      fontWeight={700} fill={ACCENT} fontFamily="'DM Sans'">{value}%</text>
+    <text x={x} y={y - 12} textAnchor="middle" fontSize={10}
+      fontWeight={700} fill={TEXT_SEC} fontFamily="'DM Sans'">{value}%</text>
   );
 };
 
@@ -433,27 +463,46 @@ const SimpleBarLabel = ({ x, y, width, value }) => {
   if (!value || value === 0) return null;
   return (
     <text x={x + width / 2} y={y - 6} textAnchor="middle" fontSize={11}
-      fontWeight={600} fill={TEXT} fontFamily="'DM Sans'">{value}</text>
+      fontWeight={700} fill={ACCENT} fontFamily="'DM Sans'">{value}</text>
   );
 };
 
 // ═══════════════════════════════════════════════════════════════
-// CUSTOM TOOLTIP
+// CUSTOM TOOLTIP (matching image style)
 // ═══════════════════════════════════════════════════════════════
-const CustomTooltip = ({ active, payload, label }) => {
+const ChartTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
+  const onTime = payload.find(p => p.dataKey === "onTime");
+  const atrasadas = payload.find(p => p.dataKey === "atrasadas");
+  const taxa = payload.find(p => p.dataKey === "taxa");
+  const count = payload.find(p => p.dataKey === "count");
   return (
     <div style={{
-      background: "#1A1A1A", borderRadius: 10, padding: "12px 16px",
-      boxShadow: "0 8px 30px rgba(0,0,0,0.25)", border: "none",
+      background: "#1A1A1A", borderRadius: 10, padding: "14px 18px",
+      boxShadow: "0 8px 30px rgba(0,0,0,0.35)", border: `1px solid #333`,
+      minWidth: 160,
     }}>
-      <p style={{ fontSize: 12, color: "#AAA", marginBottom: 6, fontWeight: 500 }}>{label}</p>
-      {payload.map((p, i) => (
-        <p key={i} style={{ fontSize: 13, color: p.color || "#FFF", fontWeight: 600, lineHeight: 1.6 }}>
-          {p.name}: {typeof p.value === "number" ? p.value.toLocaleString("pt-BR") : p.value}
-          {p.name?.includes("Taxa") ? "%" : ""}
+      <p style={{ fontSize: 14, color: "#FFF", fontWeight: 700, marginBottom: 10 }}>{label}</p>
+      {onTime !== undefined && (
+        <p style={{ fontSize: 13, color: GREEN, fontWeight: 600, lineHeight: 1.8 }}>
+          No Prazo: <strong>{onTime.value}</strong>
         </p>
-      ))}
+      )}
+      {atrasadas !== undefined && (
+        <p style={{ fontSize: 13, color: RED, fontWeight: 600, lineHeight: 1.8 }}>
+          Atrasadas: <strong>{atrasadas.value}</strong>
+        </p>
+      )}
+      {taxa !== undefined && (
+        <p style={{ fontSize: 13, color: "#FFF", fontWeight: 600, lineHeight: 1.8 }}>
+          % Atraso: <strong>{taxa.value}%</strong>
+        </p>
+      )}
+      {count !== undefined && (
+        <p style={{ fontSize: 13, color: ACCENT, fontWeight: 600, lineHeight: 1.8 }}>
+          Solicitações: <strong>{count.value}</strong>
+        </p>
+      )}
     </div>
   );
 };
@@ -1076,7 +1125,7 @@ export default function App() {
 
                 {/* CHART 1: By Date */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20, marginBottom: 20 }}>
-                  <ChartCard title="Tarefas por Data" subtitle="Barras empilhadas (On Time / Atrasadas) + Linha (Taxa de Atrasos)" delay={350}>
+                  <ChartCard title="Tarefas por Data" subtitle="Barras empilhadas (No Prazo / Atrasadas) + Linha (% Atraso)" delay={350}>
                     <ResponsiveContainer width="100%" height={380}>
                       <ComposedChart data={chartByDate} margin={{ top: 28, right: 30, left: 0, bottom: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#EEE" />
@@ -1085,19 +1134,19 @@ export default function App() {
                         <YAxis yAxisId="left" tick={{ fontSize: 11, fill: TEXT_SEC }} />
                         <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11, fill: TEXT_SEC }}
                           domain={[0, 100]} unit="%" />
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={<ChartTooltip />} />
                         <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
-                        <Bar yAxisId="left" dataKey="onTime" stackId="a" name="On Time"
+                        <Bar yAxisId="left" dataKey="onTime" stackId="a" name="No Prazo"
                           fill={GREEN} radius={[0, 0, 0, 0]}>
-                          <LabelList content={<BarCenterLabel />} />
+                          <LabelList content={<OnTimeTopLabel />} />
                         </Bar>
                         <Bar yAxisId="left" dataKey="atrasadas" stackId="a" name="Atrasadas"
                           fill={RED} radius={[3, 3, 0, 0]}>
-                          <LabelList content={<BarCenterLabel />} />
+                          <LabelList content={<AtrasadasTopLabel />} />
                         </Bar>
-                        <Line yAxisId="right" type="monotone" dataKey="taxa" name="Taxa de Atrasos"
-                          stroke={ACCENT} strokeWidth={2.5} dot={{ r: 3, fill: ACCENT }}
-                          activeDot={{ r: 5, strokeWidth: 0 }}
+                        <Line yAxisId="right" type="monotone" dataKey="taxa" name="% Atraso"
+                          stroke={TEXT_SEC} strokeWidth={2} dot={{ r: 4, fill: "#FFF", stroke: TEXT_SEC, strokeWidth: 2 }}
+                          activeDot={{ r: 6, strokeWidth: 0, fill: ACCENT }}
                           label={<LineLabel />} />
                       </ComposedChart>
                     </ResponsiveContainer>
@@ -1106,7 +1155,7 @@ export default function App() {
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20, marginBottom: 20 }}>
                   {/* CHART 2: By Executor */}
-                  <ChartCard title="Tarefas por Responsável" subtitle="Barras empilhadas + Linha (Taxa de Atrasos)" delay={400}>
+                  <ChartCard title="Tarefas por Responsável" subtitle="Barras empilhadas (No Prazo / Atrasadas) + Linha (% Atraso)" delay={400}>
                     <ResponsiveContainer width="100%" height={380}>
                       <ComposedChart data={chartByExecutor} margin={{ top: 28, right: 30, left: 0, bottom: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#EEE" />
@@ -1115,19 +1164,19 @@ export default function App() {
                         <YAxis yAxisId="left" tick={{ fontSize: 11, fill: TEXT_SEC }} />
                         <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11, fill: TEXT_SEC }}
                           domain={[0, 100]} unit="%" />
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={<ChartTooltip />} />
                         <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
-                        <Bar yAxisId="left" dataKey="onTime" stackId="a" name="On Time"
+                        <Bar yAxisId="left" dataKey="onTime" stackId="a" name="No Prazo"
                           fill={GREEN} radius={[0, 0, 0, 0]}>
-                          <LabelList content={<BarCenterLabel />} />
+                          <LabelList content={<OnTimeTopLabel />} />
                         </Bar>
                         <Bar yAxisId="left" dataKey="atrasadas" stackId="a" name="Atrasadas"
                           fill={RED} radius={[3, 3, 0, 0]}>
-                          <LabelList content={<BarCenterLabel />} />
+                          <LabelList content={<AtrasadasTopLabel />} />
                         </Bar>
-                        <Line yAxisId="right" type="monotone" dataKey="taxa" name="Taxa de Atrasos"
-                          stroke={ACCENT} strokeWidth={2.5} dot={{ r: 3, fill: ACCENT }}
-                          activeDot={{ r: 5, strokeWidth: 0 }}
+                        <Line yAxisId="right" type="monotone" dataKey="taxa" name="% Atraso"
+                          stroke={TEXT_SEC} strokeWidth={2} dot={{ r: 4, fill: "#FFF", stroke: TEXT_SEC, strokeWidth: 2 }}
+                          activeDot={{ r: 6, strokeWidth: 0, fill: ACCENT }}
                           label={<LineLabel />} />
                       </ComposedChart>
                     </ResponsiveContainer>
@@ -1141,7 +1190,7 @@ export default function App() {
                         <XAxis dataKey="flow" tick={{ fontSize: 10, fill: TEXT_SEC }}
                           angle={-35} textAnchor="end" height={80} interval={0} />
                         <YAxis tick={{ fontSize: 11, fill: TEXT_SEC }} />
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip content={<ChartTooltip />} />
                         <Bar dataKey="count" name="Solicitações" fill={ACCENT}
                           radius={[4, 4, 0, 0]}>
                           <LabelList content={<SimpleBarLabel />} />
