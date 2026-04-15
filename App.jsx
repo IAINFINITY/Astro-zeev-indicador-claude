@@ -8,15 +8,16 @@ const SUPABASE_URL = "https://jpkdgpkkyhibihawkhjw.supabase.co";
 const SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impwa2RncGtreWhpYmloYXdraGp3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcxOTMyOTk0NCwiZXhwIjoyMDM0OTA1OTQ0fQ.4zLxnS9ZuTBgAvw6AWLkJ4UuEh88NFAtd3vC5cEqZOM";
 
 const supabaseFetch = async (endpoint, options = {}) => {
+  const { headers: extraHeaders, ...restOptions } = options;
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
+    ...restOptions,
     headers: {
       apikey: SUPABASE_SERVICE_ROLE_KEY,
       Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
       "Content-Type": "application/json",
       Prefer: "return=representation",
-      ...options.headers,
+      ...extraHeaders,
     },
-    ...options,
   });
   if (!res.ok) throw new Error(`Supabase error: ${res.status}`);
   return res.json();
