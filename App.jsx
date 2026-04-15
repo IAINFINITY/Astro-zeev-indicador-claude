@@ -5,7 +5,7 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, L
 // CONFIGURAÇÃO SUPABASE — ALTERE AQUI
 // ═══════════════════════════════════════════════════════════════
 const SUPABASE_URL = "https://jpkdgpkkyhibihawkhjw.supabase.co";
-const SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impwa2RncGtreWhpYmloYXdraGp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTkzMjk5NDQsImV4cCI6MjAzNDkwNTk0NH0.FIyO4VsrtPfXdRGNedRRpnZJRAqwPpvOyAFw_wFfYEQ";
+const SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impwa2RncGtreWhpYmloYXdraGp3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcxOTMyOTk0NCwiZXhwIjoyMDM0OTA1OTQ0fQ.4zLxnS9ZuTBgAvw6AWLkJ4UuEh88NFAtd3vC5cEqZOM";
 
 const supabaseFetch = async (endpoint, options = {}) => {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
