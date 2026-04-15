@@ -233,58 +233,165 @@ const MultiSelect = ({ label, options, selected, onChange }) => {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// DATE RANGE PICKER
+// DATE RANGE PICKER (custom dark themed)
 // ═══════════════════════════════════════════════════════════════
-const DateRangePicker = ({ startDate, endDate, onStartChange, onEndChange, onClear }) => (
-  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-    <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-      <span style={{
-        position: "absolute", left: 12, fontSize: 10, fontWeight: 600, color: ACCENT,
-        textTransform: "uppercase", letterSpacing: 0.5, pointerEvents: "none",
-        top: startDate ? 4 : "50%", transform: startDate ? "none" : "translateY(-50%)",
-        transition: "all 0.2s",
-      }}>{startDate ? "De" : "Data início"}</span>
-      <input type="date" value={startDate} onChange={(e) => onStartChange(e.target.value)}
-        style={{
-          padding: startDate ? "18px 12px 6px" : "10px 12px", border: `1px solid ${ACCENT}40`,
-          borderRadius: 8, fontSize: 13, fontFamily: "'DM Sans'", background: CARD_BG, color: TEXT,
-          outline: "none", transition: "border-color 0.2s", minWidth: 150,
-        }}
-        onFocus={(e) => e.target.style.borderColor = ACCENT}
-        onBlur={(e) => e.target.style.borderColor = `${ACCENT}40`}
-      />
-    </div>
-    <span style={{ color: ACCENT, fontSize: 13, fontWeight: 600 }}>até</span>
-    <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-      <span style={{
-        position: "absolute", left: 12, fontSize: 10, fontWeight: 600, color: ACCENT,
-        textTransform: "uppercase", letterSpacing: 0.5, pointerEvents: "none",
-        top: endDate ? 4 : "50%", transform: endDate ? "none" : "translateY(-50%)",
-        transition: "all 0.2s",
-      }}>{endDate ? "Até" : "Data fim"}</span>
-      <input type="date" value={endDate} onChange={(e) => onEndChange(e.target.value)}
-        style={{
-          padding: endDate ? "18px 12px 6px" : "10px 12px", border: `1px solid ${ACCENT}40`,
-          borderRadius: 8, fontSize: 13, fontFamily: "'DM Sans'", background: CARD_BG, color: TEXT,
-          outline: "none", transition: "border-color 0.2s", minWidth: 150,
-        }}
-        onFocus={(e) => e.target.style.borderColor = ACCENT}
-        onBlur={(e) => e.target.style.borderColor = `${ACCENT}40`}
-      />
-    </div>
-    {(startDate || endDate) && (
-      <button onClick={onClear} style={{
-        padding: "10px 16px", border: "none", borderRadius: 8,
-        background: ACCENT, color: "#FFF", cursor: "pointer",
-        fontSize: 12, fontWeight: 700, fontFamily: "'DM Sans'",
-        transition: "opacity 0.2s",
-      }}
-        onMouseEnter={(e) => e.target.style.opacity = 0.85}
-        onMouseLeave={(e) => e.target.style.opacity = 1}
-      >Limpar</button>
-    )}
-  </div>
+const MONTHS_PT = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+const DAYS_PT = ["dom","seg","ter","qua","qui","sex","sáb"];
+
+const CalendarIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke={ACCENT} strokeWidth="1.5" strokeLinecap="round">
+    <rect x="1" y="3" width="14" height="12" rx="2" /><path d="M1 7h14M5 1v4M11 1v4" />
+  </svg>
 );
+
+const DateRangePicker = ({ startDate, endDate, onStartChange, onEndChange, onClear }) => {
+  const [open, setOpen] = useState(null); // "start" | "end" | null
+  const ref = useRef(null);
+  const today = new Date();
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(null); };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const openCal = (which) => {
+    const d = which === "start" && startDate ? new Date(startDate + "T12:00:00")
+            : which === "end" && endDate ? new Date(endDate + "T12:00:00") : today;
+    setViewMonth(d.getMonth());
+    setViewYear(d.getFullYear());
+    setOpen(which);
+  };
+
+  const prevMonth = () => { if (viewMonth === 0) { setViewMonth(11); setViewYear(viewYear - 1); } else setViewMonth(viewMonth - 1); };
+  const nextMonth = () => { if (viewMonth === 11) { setViewMonth(0); setViewYear(viewYear + 1); } else setViewMonth(viewMonth + 1); };
+
+  const selectDate = (day) => {
+    const val = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    if (open === "start") { onStartChange(val); setOpen("end"); }
+    else { onEndChange(val); setOpen(null); }
+  };
+
+  const getDays = () => {
+    const first = new Date(viewYear, viewMonth, 1);
+    const lastDay = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const startDay = first.getDay();
+    const days = [];
+    for (let i = 0; i < startDay; i++) days.push(null);
+    for (let d = 1; d <= lastDay; d++) days.push(d);
+    return days;
+  };
+
+  const isSelected = (day) => {
+    if (!day) return false;
+    const ds = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    return ds === startDate || ds === endDate;
+  };
+
+  const isInRange = (day) => {
+    if (!day || !startDate || !endDate) return false;
+    const ds = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    return ds > startDate && ds < endDate;
+  };
+
+  const isToday = (day) => {
+    if (!day) return false;
+    return day === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear();
+  };
+
+  const fmt = (d) => { if (!d) return null; const p = d.split("-"); return `${p[2]}/${p[1]}/${p[0]}`; };
+
+  const chipStyle = (hasVal) => ({
+    display: "flex", alignItems: "center", gap: 6, padding: "7px 10px",
+    background: hasVal ? "#2A2A2A" : "transparent", border: `1px solid ${hasVal ? "#444" : ACCENT + "60"}`,
+    borderRadius: 6, cursor: "pointer", fontSize: 13, fontFamily: "'DM Sans'",
+    color: hasVal ? "#FFF" : TEXT_SEC, fontWeight: hasVal ? 500 : 400,
+    transition: "all 0.2s",
+  });
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <div style={chipStyle(!!startDate)} onClick={() => openCal("start")}>
+          <CalendarIcon />
+          <span>{startDate ? fmt(startDate) : "Início"}</span>
+          {startDate && (
+            <span onClick={(e) => { e.stopPropagation(); onStartChange(""); }}
+              style={{ cursor: "pointer", color: "#888", fontSize: 14, lineHeight: 1, marginLeft: 2 }}>×</span>
+          )}
+        </div>
+        <span style={{ color: "#666", fontSize: 16, fontWeight: 300 }}>—</span>
+        <div style={chipStyle(!!endDate)} onClick={() => openCal("end")}>
+          <CalendarIcon />
+          <span>{endDate ? fmt(endDate) : "Fim"}</span>
+          {endDate && (
+            <span onClick={(e) => { e.stopPropagation(); onEndChange(""); }}
+              style={{ cursor: "pointer", color: "#888", fontSize: 14, lineHeight: 1, marginLeft: 2 }}>×</span>
+          )}
+        </div>
+      </div>
+
+      {open && (
+        <div style={{
+          position: "absolute", top: "100%", left: 0, marginTop: 6, zIndex: 9999,
+          background: "#1E1E1E", border: "1px solid #333", borderRadius: 12,
+          padding: 16, width: 280, boxShadow: "0 12px 40px rgba(0,0,0,0.4)",
+          animation: "fadeIn 0.15s ease-out",
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+            <button onClick={prevMonth} style={{
+              background: "none", border: "none", color: "#888", cursor: "pointer", fontSize: 18, padding: "2px 8px",
+            }}>‹</button>
+            <span style={{ fontSize: 14, fontWeight: 600, color: "#FFF", letterSpacing: 0.3 }}>
+              {MONTHS_PT[viewMonth]} {viewYear}
+            </span>
+            <button onClick={nextMonth} style={{
+              background: "none", border: "none", color: "#888", cursor: "pointer", fontSize: 18, padding: "2px 8px",
+            }}>›</button>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, textAlign: "center" }}>
+            {DAYS_PT.map((d) => (
+              <div key={d} style={{ fontSize: 11, color: "#666", fontWeight: 600, padding: "4px 0", textTransform: "lowercase" }}>{d}</div>
+            ))}
+            {getDays().map((day, i) => {
+              const selected = isSelected(day);
+              const inRange = isInRange(day);
+              const todayMark = isToday(day);
+              return (
+                <div key={i} onClick={() => day && selectDate(day)} style={{
+                  padding: "8px 0", fontSize: 13, borderRadius: 8, cursor: day ? "pointer" : "default",
+                  fontWeight: selected ? 700 : todayMark ? 600 : 400,
+                  background: selected ? ACCENT : inRange ? `${ACCENT}20` : "transparent",
+                  color: selected ? "#FFF" : day ? (inRange ? ACCENT : "#CCC") : "transparent",
+                  border: todayMark && !selected ? `1px solid ${ACCENT}` : "1px solid transparent",
+                  transition: "all 0.15s",
+                }}
+                  onMouseEnter={(e) => { if (day && !selected) e.currentTarget.style.background = "#333"; }}
+                  onMouseLeave={(e) => { if (day && !selected) e.currentTarget.style.background = inRange ? `${ACCENT}20` : "transparent"; }}
+                >{day || ""}</div>
+              );
+            })}
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12, paddingTop: 10, borderTop: "1px solid #333" }}>
+            <button onClick={() => {
+              setViewMonth(today.getMonth());
+              setViewYear(today.getFullYear());
+            }} style={{
+              background: "none", border: "none", color: ACCENT, cursor: "pointer",
+              fontSize: 12, fontWeight: 600, fontFamily: "'DM Sans'",
+            }}>Hoje</button>
+            <button onClick={() => { onClear(); setOpen(null); }} style={{
+              background: "none", border: "none", color: "#888", cursor: "pointer",
+              fontSize: 12, fontWeight: 500, fontFamily: "'DM Sans'",
+            }}>Limpar</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // ═══════════════════════════════════════════════════════════════
 // MODAL DE EXTRATIFICAÇÃO
