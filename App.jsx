@@ -347,7 +347,7 @@ const DrilldownModal = ({ title, data, columns, onClose }) => {
 // ═══════════════════════════════════════════════════════════════
 // SCORECARD
 // ═══════════════════════════════════════════════════════════════
-const Scorecard = ({ label, value, suffix = "", icon, color = ACCENT, onClick, delay = 0 }) => (
+const Scorecard = ({ label, value, suffix = "", color = ACCENT, onClick, delay = 0 }) => (
   <button onClick={onClick} style={{
     background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 14,
     padding: "22px 24px", cursor: "pointer", textAlign: "left",
@@ -371,19 +371,13 @@ const Scorecard = ({ label, value, suffix = "", icon, color = ACCENT, onClick, d
       position: "absolute", top: 0, left: 0, right: 0, height: 3,
       background: `linear-gradient(90deg, ${color}, ${color}88)`,
     }} />
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-      <div>
-        <p style={{ fontSize: 12, color: TEXT_SEC, fontWeight: 500, marginBottom: 8, letterSpacing: 0.3 }}>
-          {label}
-        </p>
-        <p style={{ fontSize: 30, fontWeight: 700, color: TEXT, lineHeight: 1 }}>
-          {value}<span style={{ fontSize: 16, color: TEXT_SEC, fontWeight: 500, marginLeft: 2 }}>{suffix}</span>
-        </p>
-      </div>
-      <div style={{
-        width: 42, height: 42, borderRadius: 12, background: `${color}12`,
-        display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20,
-      }}>{icon}</div>
+    <div>
+      <p style={{ fontSize: 12, color: TEXT_SEC, fontWeight: 500, marginBottom: 8, letterSpacing: 0.3 }}>
+        {label}
+      </p>
+      <p style={{ fontSize: 30, fontWeight: 700, color: TEXT, lineHeight: 1 }}>
+        {value}<span style={{ fontSize: 16, color: TEXT_SEC, fontWeight: 500, marginLeft: 2 }}>{suffix}</span>
+      </p>
     </div>
     <p style={{ fontSize: 11, color: ACCENT, marginTop: 12, fontWeight: 500 }}>
       Clique para detalhes →
@@ -1030,19 +1024,19 @@ export default function App() {
                   gap: 14, marginBottom: 28,
                 }}>
                   <Scorecard label="Solicitações" value={scorecards.qtd_solicitacoes}
-                    icon="📋" color={BLUE} onClick={() => openDrilldown("solicitacoes")} delay={0} />
+                    color={BLUE} onClick={() => openDrilldown("solicitacoes")} delay={0} />
                   <Scorecard label="Tarefas" value={scorecards.qtd_tarefas}
-                    icon="📝" color={TEXT} onClick={() => openDrilldown("tarefas")} delay={50} />
+                    color={TEXT} onClick={() => openDrilldown("tarefas")} delay={50} />
                   <Scorecard label="Tarefas On Time" value={scorecards.qtd_ontime}
-                    icon="✅" color={GREEN} onClick={() => openDrilldown("ontime")} delay={100} />
+                    color={GREEN} onClick={() => openDrilldown("ontime")} delay={100} />
                   <Scorecard label="Taxa On Time" value={scorecards.taxa_ontime} suffix="%"
-                    icon="📊" color={GREEN} onClick={() => openDrilldown("taxa_ontime")} delay={150} />
+                    color={GREEN} onClick={() => openDrilldown("taxa_ontime")} delay={150} />
                   <Scorecard label="Tarefas Atrasadas" value={scorecards.qtd_atrasadas}
-                    icon="⚠" color={RED} onClick={() => openDrilldown("atrasadas")} delay={200} />
+                    color={RED} onClick={() => openDrilldown("atrasadas")} delay={200} />
                   <Scorecard label="Taxa Atrasadas" value={scorecards.taxa_atrasadas} suffix="%"
-                    icon="📉" color={RED} onClick={() => openDrilldown("taxa_atrasadas")} delay={250} />
+                    color={RED} onClick={() => openDrilldown("taxa_atrasadas")} delay={250} />
                   <Scorecard label="onTime Null" value={scorecards.qtd_ontime_null}
-                    icon="❓" color={YELLOW} onClick={() => openDrilldown("null")} delay={300} />
+                    color={YELLOW} onClick={() => openDrilldown("null")} delay={300} />
                 </div>
 
                 {/* CHART 1: By Date */}
@@ -1070,7 +1064,7 @@ export default function App() {
                   </ChartCard>
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20, marginBottom: 20 }}>
                   {/* CHART 2: By Executor */}
                   <ChartCard title="Tarefas por Responsável" subtitle="Barras empilhadas + Linha (Taxa de Atrasos)" delay={400}>
                     <ResponsiveContainer width="100%" height={340}>
