@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart } from "recharts";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, LabelList } from "recharts";
 
 // ═══════════════════════════════════════════════════════════════
 // CONFIGURAÇÃO SUPABASE — ALTERE AQUI
@@ -401,6 +401,41 @@ const ChartCard = ({ title, subtitle, children, delay = 0 }) => (
     {children}
   </div>
 );
+
+// ═══════════════════════════════════════════════════════════════
+// CUSTOM DATA LABELS (anti-overlap)
+// ═══════════════════════════════════════════════════════════════
+const BarTopLabel = ({ x, y, width, value }) => {
+  if (!value || value === 0) return null;
+  return (
+    <text x={x + width / 2} y={y - 6} textAnchor="middle" fontSize={10}
+      fontWeight={600} fill={TEXT} fontFamily="'DM Sans'">{value}</text>
+  );
+};
+
+const BarCenterLabel = ({ x, y, width, height, value }) => {
+  if (!value || value === 0 || height < 18) return null;
+  return (
+    <text x={x + width / 2} y={y + height / 2 + 4} textAnchor="middle" fontSize={9}
+      fontWeight={600} fill="#FFF" fontFamily="'DM Sans'">{value}</text>
+  );
+};
+
+const LineLabel = ({ x, y, value }) => {
+  if (value === undefined || value === null) return null;
+  return (
+    <text x={x} y={y - 14} textAnchor="middle" fontSize={10}
+      fontWeight={700} fill={ACCENT} fontFamily="'DM Sans'">{value}%</text>
+  );
+};
+
+const SimpleBarLabel = ({ x, y, width, value }) => {
+  if (!value || value === 0) return null;
+  return (
+    <text x={x + width / 2} y={y - 6} textAnchor="middle" fontSize={11}
+      fontWeight={600} fill={TEXT} fontFamily="'DM Sans'">{value}</text>
+  );
+};
 
 // ═══════════════════════════════════════════════════════════════
 // CUSTOM TOOLTIP
@@ -1042,8 +1077,8 @@ export default function App() {
                 {/* CHART 1: By Date */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20, marginBottom: 20 }}>
                   <ChartCard title="Tarefas por Data" subtitle="Barras empilhadas (On Time / Atrasadas) + Linha (Taxa de Atrasos)" delay={350}>
-                    <ResponsiveContainer width="100%" height={340}>
-                      <ComposedChart data={chartByDate} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
+                    <ResponsiveContainer width="100%" height={380}>
+                      <ComposedChart data={chartByDate} margin={{ top: 28, right: 30, left: 0, bottom: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#EEE" />
                         <XAxis dataKey="date" tick={{ fontSize: 11, fill: TEXT_SEC }}
                           angle={-35} textAnchor="end" height={60} />
@@ -1053,12 +1088,17 @@ export default function App() {
                         <Tooltip content={<CustomTooltip />} />
                         <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
                         <Bar yAxisId="left" dataKey="onTime" stackId="a" name="On Time"
-                          fill={GREEN} radius={[0, 0, 0, 0]} />
+                          fill={GREEN} radius={[0, 0, 0, 0]}>
+                          <LabelList content={<BarCenterLabel />} />
+                        </Bar>
                         <Bar yAxisId="left" dataKey="atrasadas" stackId="a" name="Atrasadas"
-                          fill={RED} radius={[3, 3, 0, 0]} />
+                          fill={RED} radius={[3, 3, 0, 0]}>
+                          <LabelList content={<BarCenterLabel />} />
+                        </Bar>
                         <Line yAxisId="right" type="monotone" dataKey="taxa" name="Taxa de Atrasos"
                           stroke={ACCENT} strokeWidth={2.5} dot={{ r: 3, fill: ACCENT }}
-                          activeDot={{ r: 5, strokeWidth: 0 }} />
+                          activeDot={{ r: 5, strokeWidth: 0 }}
+                          label={<LineLabel />} />
                       </ComposedChart>
                     </ResponsiveContainer>
                   </ChartCard>
@@ -1067,8 +1107,8 @@ export default function App() {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20, marginBottom: 20 }}>
                   {/* CHART 2: By Executor */}
                   <ChartCard title="Tarefas por Responsável" subtitle="Barras empilhadas + Linha (Taxa de Atrasos)" delay={400}>
-                    <ResponsiveContainer width="100%" height={340}>
-                      <ComposedChart data={chartByExecutor} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
+                    <ResponsiveContainer width="100%" height={380}>
+                      <ComposedChart data={chartByExecutor} margin={{ top: 28, right: 30, left: 0, bottom: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#EEE" />
                         <XAxis dataKey="executor" tick={{ fontSize: 10, fill: TEXT_SEC }}
                           angle={-35} textAnchor="end" height={80} interval={0} />
@@ -1078,27 +1118,34 @@ export default function App() {
                         <Tooltip content={<CustomTooltip />} />
                         <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
                         <Bar yAxisId="left" dataKey="onTime" stackId="a" name="On Time"
-                          fill={GREEN} radius={[0, 0, 0, 0]} />
+                          fill={GREEN} radius={[0, 0, 0, 0]}>
+                          <LabelList content={<BarCenterLabel />} />
+                        </Bar>
                         <Bar yAxisId="left" dataKey="atrasadas" stackId="a" name="Atrasadas"
-                          fill={RED} radius={[3, 3, 0, 0]} />
+                          fill={RED} radius={[3, 3, 0, 0]}>
+                          <LabelList content={<BarCenterLabel />} />
+                        </Bar>
                         <Line yAxisId="right" type="monotone" dataKey="taxa" name="Taxa de Atrasos"
                           stroke={ACCENT} strokeWidth={2.5} dot={{ r: 3, fill: ACCENT }}
-                          activeDot={{ r: 5, strokeWidth: 0 }} />
+                          activeDot={{ r: 5, strokeWidth: 0 }}
+                          label={<LineLabel />} />
                       </ComposedChart>
                     </ResponsiveContainer>
                   </ChartCard>
 
                   {/* CHART 3: By Flow */}
                   <ChartCard title="Solicitações por Tipo" subtitle="Quantidade de solicitações únicas por flow_name" delay={450}>
-                    <ResponsiveContainer width="100%" height={340}>
-                      <BarChart data={chartByFlow} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
+                    <ResponsiveContainer width="100%" height={380}>
+                      <BarChart data={chartByFlow} margin={{ top: 28, right: 20, left: 0, bottom: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#EEE" />
                         <XAxis dataKey="flow" tick={{ fontSize: 10, fill: TEXT_SEC }}
                           angle={-35} textAnchor="end" height={80} interval={0} />
                         <YAxis tick={{ fontSize: 11, fill: TEXT_SEC }} />
                         <Tooltip content={<CustomTooltip />} />
                         <Bar dataKey="count" name="Solicitações" fill={ACCENT}
-                          radius={[4, 4, 0, 0]} />
+                          radius={[4, 4, 0, 0]}>
+                          <LabelList content={<SimpleBarLabel />} />
+                        </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   </ChartCard>
