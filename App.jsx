@@ -714,9 +714,6 @@ const LoginPage = ({ onLogin }) => {
             {loading ? "Entrando..." : "Entrar"}
           </button>
         </div>
-        <p style={{ fontSize: 11, color: TEXT_SEC, textAlign: "center", marginTop: 20 }}>
-          admin / admin123 (superadmin) · viewer / viewer123
-        </p>
       </div>
     </div>
   );
