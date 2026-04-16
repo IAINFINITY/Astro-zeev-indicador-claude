@@ -1195,6 +1195,43 @@ export default function App() {
                   onStartChange={setDateStart} onEndChange={setDateEnd}
                   onClear={() => { setDateStart(""); setDateEnd(""); }}
                 />
+                {[
+                  { label: "Esta Semana", getRange: () => {
+                    const now = new Date();
+                    const day = now.getDay();
+                    const start = new Date(now); start.setDate(now.getDate() - day);
+                    return { start: start.toISOString().split("T")[0], end: now.toISOString().split("T")[0] };
+                  }},
+                  { label: "Este Mês", getRange: () => {
+                    const now = new Date();
+                    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+                    return { start: start.toISOString().split("T")[0], end: now.toISOString().split("T")[0] };
+                  }},
+                  { label: "Últimos 3 Meses", getRange: () => {
+                    const now = new Date();
+                    const start = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+                    return { start: start.toISOString().split("T")[0], end: now.toISOString().split("T")[0] };
+                  }},
+                ].map((preset) => {
+                  const { start, end } = preset.getRange();
+                  const isActive = dateStart === start && dateEnd === end;
+                  return (
+                    <button key={preset.label} onClick={() => {
+                      if (isActive) { setDateStart(""); setDateEnd(""); }
+                      else { setDateStart(start); setDateEnd(end); }
+                    }} style={{
+                      padding: "7px 14px", borderRadius: 6, fontSize: 12, fontWeight: 600,
+                      fontFamily: "'DM Sans'", cursor: "pointer", whiteSpace: "nowrap",
+                      border: isActive ? "none" : `1px solid ${ACCENT}50`,
+                      background: isActive ? ACCENT : "transparent",
+                      color: isActive ? "#FFF" : ACCENT,
+                      transition: "all 0.2s",
+                    }}
+                      onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = `${ACCENT}15`; }}
+                      onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = "transparent"; }}
+                    >{preset.label}</button>
+                  );
+                })}
               </div>
             </div>
 
