@@ -399,9 +399,43 @@ const DateRangePicker = ({ startDate, endDate, onStartChange, onEndChange, onCle
 // ═══════════════════════════════════════════════════════════════
 const DrilldownModal = ({ title, data, columns, onClose }) => {
   const [page, setPage] = useState(0);
+  const [sortKey, setSortKey] = useState(null);
+  const [sortDir, setSortDir] = useState("asc"); // "asc" | "desc"
   const perPage = 15;
-  const totalPages = Math.ceil(data.length / perPage);
-  const pageData = data.slice(page * perPage, (page + 1) * perPage);
+
+  const handleSort = (key) => {
+    if (sortKey === key) {
+      if (sortDir === "asc") setSortDir("desc");
+      else if (sortDir === "desc") { setSortKey(null); setSortDir("asc"); }
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+    setPage(0);
+  };
+
+  const sortedData = useMemo(() => {
+    if (!sortKey) return data;
+    return [...data].sort((a, b) => {
+      let va = a[sortKey], vb = b[sortKey];
+      if (va == null && vb == null) return 0;
+      if (va == null) return 1;
+      if (vb == null) return -1;
+      if (typeof va === "boolean") { va = va ? 1 : 0; vb = vb ? 1 : 0; }
+      if (typeof va === "number" && typeof vb === "number") return sortDir === "asc" ? va - vb : vb - va;
+      const sa = String(va).toLowerCase(), sb = String(vb).toLowerCase();
+      const cmp = sa.localeCompare(sb, "pt-BR");
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+  }, [data, sortKey, sortDir]);
+
+  const totalPages = Math.ceil(sortedData.length / perPage);
+  const pageData = sortedData.slice(page * perPage, (page + 1) * perPage);
+
+  const getSortIcon = (key) => {
+    if (sortKey !== key) return "↕";
+    return sortDir === "asc" ? "↑" : "↓";
+  };
 
   return (
     <div onClick={onClose} style={{
@@ -433,12 +467,22 @@ const DrilldownModal = ({ title, data, columns, onClose }) => {
             <thead>
               <tr>
                 {columns.map((c) => (
-                  <th key={c.key} style={{
+                  <th key={c.key} onClick={() => handleSort(c.key)} style={{
                     padding: "12px 10px", textAlign: "left", fontWeight: 600,
-                    borderBottom: `2px solid ${BORDER}`, whiteSpace: "nowrap",
+                    borderBottom: `2px solid ${sortKey === c.key ? ACCENT : BORDER}`, whiteSpace: "nowrap",
                     position: "sticky", top: 0, background: CARD_BG, fontSize: 12,
-                    color: TEXT_SEC, textTransform: "uppercase", letterSpacing: 0.5,
-                  }}>{c.label}</th>
+                    color: sortKey === c.key ? ACCENT : TEXT_SEC,
+                    textTransform: "uppercase", letterSpacing: 0.5,
+                    cursor: "pointer", userSelect: "none", transition: "color 0.2s",
+                  }}>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      {c.label}
+                      <span style={{
+                        fontSize: 11, opacity: sortKey === c.key ? 1 : 0.3,
+                        transition: "opacity 0.2s",
+                      }}>{getSortIcon(c.key)}</span>
+                    </span>
+                  </th>
                 ))}
               </tr>
             </thead>
