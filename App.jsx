@@ -982,7 +982,7 @@ export default function App() {
         ...r,
         taxa: r.onTime + r.atrasadas > 0 ? +((r.atrasadas / (r.onTime + r.atrasadas)) * 100).toFixed(1) : 0,
       }))
-      .sort((a, b) => b.onTime - a.onTime);
+      .sort((a, b) => a.date.localeCompare(b.date));
   }, [filteredData]);
 
   // Chart 2: By executor
