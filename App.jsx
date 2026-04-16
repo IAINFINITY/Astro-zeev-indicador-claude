@@ -32,6 +32,7 @@ const supabaseFetch = async (endpoint, options = {}) => {
 const USERS = [
   { username: "admin", password: "admin123", role: "superadmin", name: "Administrador" },
   { username: "viewer", password: "viewer123", role: "viewer", name: "Visualizador" },
+  { username: "Astro", password: "Acesso123$", role: "viewr", name: "Astro" },
 ];
 
 // ═══════════════════════════════════════════════════════════════
